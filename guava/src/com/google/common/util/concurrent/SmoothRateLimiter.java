@@ -354,7 +354,10 @@ abstract class SmoothRateLimiter extends RateLimiter {
   final long reserveEarliestAvailable(int requiredPermits, long nowMicros) {
     resync(nowMicros);
     long returnValue = nextFreeTicketMicros;
+    // 返回可消费的令牌数，取 requiredPermits（需要的令牌数） 与 storedPermits（桶中已有的令牌数） 中的最小数
     double storedPermitsToSpend = min(requiredPermits, this.storedPermits);
+    // 还需要新生成的令牌数，如果桶中剩余的令牌数足够需要的令牌数，即上一步中计算使得 requiredPermits == storedPermitsToSpend，这个值为0
+    // 即 freshPermits >= 0
     double freshPermits = requiredPermits - storedPermitsToSpend;
     long waitMicros =
         storedPermitsToWaitTime(this.storedPermits, storedPermitsToSpend)
